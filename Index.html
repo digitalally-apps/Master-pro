@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Jurnal Guru Pro - Digital Ally</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#BB86FC">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* DARK MODE (DEFAULT) */
+            --bg-body: #121212; --bg-card: #1E1E1E; --bg-input: #2C2C2C;
+            --border: #333333; --text-main: #E0E0E0; --text-muted: #A0A0A0;
+            --primary: #BB86FC; --accent: #03DAC6; --danger: #CF6679;
+            --warning: #FFAB00; --success: #00C853; --info: #2979FF;
+            --nav-bg: #1E1E1E;
+        }
+
+        [data-theme="light"] {
+            /* LIGHT MODE */
+            --bg-body: #F5F5F7; --bg-card: #FFFFFF; --bg-input: #EFEFEF;
+            --border: #DDDDDD; --text-main: #1D1D1F; --text-muted: #86868B;
+            --primary: #6200EE; --accent: #018786; --danger: #B00020;
+            --warning: #F57C00; --success: #388E3C; --info: #0277BD;
+            --nav-bg: #FFFFFF;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; transition: background 0.3s, color 0.3s; }
+        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); padding-bottom: 85px; }
+
+        /* HEADER */
+        .header { background: var(--bg-card); padding: 15px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; display: flex; justify-content: space-between; align-items: center; }
+        .header h2 { margin: 0; font-size: 1.1em; }
+        .header p { margin: 0; font-size: 0.7em; color: var(--text-muted); }
+        .header-tools { display: flex; gap: 15px; align-items: center; }
+
+        /* SECTIONS */
+        .section { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .section.active { display: block; }
+        .card { background: var(--bg-card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; position: relative; }
+
+        /* INPUTS & BUTTONS */
+        label { display: block; font-size: 0.85em; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; }
+        input, select, textarea { width: 100%; padding: 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); font-family: inherit; font-size: 14px; }
+        input[readonly] { opacity: 0.7; cursor: not-allowed; border-style: dashed; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        [data-theme="dark"] .btn-primary { color: #000; }
+        .btn-success { background: var(--success); color: #fff; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+
+        /* DASHBOARD */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .stat-box { background: var(--bg-input); padding: 15px; border-radius: 10px; text-align: center; }
+        .stat-val { font-size: 1.5em; font-weight: bold; display: block; }
+        .stat-lbl { font-size: 0.7em; text-transform: uppercase; color: var(--text-muted); }
+        
+        .today-list { list-style: none; padding: 0; margin: 0; }
+        .today-item { padding: 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.7em; font-weight: bold; color: #fff; }
+
+        /* ABSENSI & LISTS */
+        .search-bar { margin-bottom: 15px; }
+        .absen-row { padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+        .absen-top { display: flex; justify-content: space-between; align-items: center; }
+        .absen-opts { display: flex; gap: 5px; }
+        
+        input[type="radio"] { display: none; }
+        .opt-lbl { width: 32px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8em; background: var(--bg-input); color: var(--text-muted); cursor: pointer; border: 1px solid var(--border); }
+        input[value="S"]:checked + .opt-lbl { background: var(--primary); color: white; border:none; }
+        input[value="I"]:checked + .opt-lbl { background: var(--warning); color: white; border:none; }
+        input[value="A"]:checked + .opt-lbl { background: var(--danger); color: white; border:none; }
+        
+        [data-theme="dark"] input[value="S"]:checked + .opt-lbl { color: black; }
+        [data-theme="dark"] input[value="I"]:checked + .opt-lbl { color: black; }
+
+        /* REPORT TABLE */
+        .recap-table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
+        .recap-table th { text-align: left; color: var(--text-muted); padding: 8px 4px; border-bottom: 1px solid var(--border); }
+        .recap-table td { padding: 8px 4px; border-bottom: 1px solid var(--border); }
+        .col-num { width: 35px; text-align: center; font-weight: bold; }
+        .zero-val { color: var(--text-muted); font-weight: normal; opacity: 0.5; }
+
+        /* BOTTOM NAV */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--nav-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+        .nav-item { text-align: center; color: var(--text-muted); font-size: 0.7em; width: 20%; cursor: pointer; }
+        .nav-item.active { color: var(--accent); font-weight: bold; }
+        .nav-icon { font-size: 1.4em; display: block; margin-bottom: 3px; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h2 id="disp-school">Digital Ally</h2>
+            <p id="disp-teacher" style="color:var(--primary); font-weight:bold; font-size:0.8em;">...</p>
+        </div>
+        <div class="header-tools">
+            <div onclick="toggleTheme()" style="font-size:1.2em; cursor:pointer;">🌓</div>
+            <div onclick="initApp()" style="font-size:1.2em; cursor:pointer;">🔄</div>
+        </div>
+    </div>
+
+    <div id="view-home" class="section active">
+        <div class="card" style="border-left: 5px solid var(--accent);">
+            <h3 style="margin-top:0; color:var(--text-main);">Log Harian</h3>
+            <div id="today-summary"></div>
+            <div style="margin-top:10px;">
+                <button class="btn btn-primary" style="margin:0; font-size:0.8em; width:auto;" onclick="nav('absen', document.querySelectorAll('.nav-item')[1])">📝 Isi Absen</button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="stat-box"><span class="stat-val" id="today-sakit" style="color:var(--primary)">0</span><span class="stat-lbl">Sakit</span></div>
+            <div class="stat-box"><span class="stat-val" id="today-izin" style="color:var(--warning)">0</span><span class="stat-lbl">Izin</span></div>
+            <div class="stat-box"><span class="stat-val" id="today-alpha" style="color:var(--danger)">0</span><span class="stat-lbl">Alpha</span></div>
+            <div class="stat-box"><span class="stat-val" id="today-kasus" style="color:var(--text-main)">0</span><span class="stat-lbl">Kasus</span></div>
+        </div>
+
+        <div class="card" style="border-left: 5px solid var(--info); margin-top: 15px;">
+            <h3 style="margin-top:0;">📅 Jadwal Panggil</h3>
+            <ul id="schedule-container" class="today-list"></ul>
+        </div>
+    </div>
+
+    <div id="view-absen" class="section">
+        <div class="card">
+            <label>Tanggal</label>
+            <input type="date" id="absen-tgl">
+        </div>
+        <div class="search-bar">
+            <input type="text" id="search-absen" placeholder="🔍 Cari nama siswa..." onkeyup="filterAbsen()">
+        </div>
+        <div class="card" style="padding: 0 15px;">
+            <div id="list-absen-container"></div>
+        </div>
+        <button class="btn btn-primary" onclick="simpanAbsen()">💾 Simpan Absensi</button>
+    </div>
+
+    <div id="view-kasus" class="section">
+        <div class="card">
+            <label>Siswa</label>
+            <select id="kasus-nama"><option value="">-- Pilih --</option></select>
+            <label style="margin-top:10px;">Tanggal Kejadian</label>
+            <input type="date" id="kasus-tgl">
+            <label style="margin-top:10px;">Kategori</label>
+            <select id="kasus-kat">
+                <option value="Ringan">🟢 Ringan (Atribut/Terlambat)</option>
+                <option value="Sedang">🟠 Sedang (Bolos/Gaduh)</option>
+                <option value="Berat">🔴 Berat (Narkoba/Bullying)</option>
+            </select>
+            <div style="background:var(--bg-input); padding:10px; border-radius:8px; margin-top:15px; border:1px solid var(--info);">
+                <label style="color:var(--info);">📅 Target Panggil (Opsional)</label>
+                <input type="date" id="kasus-deadline" style="border-color:var(--info);">
+            </div>
+            <label style="margin-top:15px;">Kronologi</label>
+            <textarea id="kasus-ket" rows="3"></textarea>
+            <button class="btn btn-danger" onclick="simpanKasus()">⚠️ Catat Kasus</button>
+        </div>
+    </div>
+
+    <div id="view-laporan" class="section">
+         <div class="card">
+            <h3 style="margin-top:0;">Rekapitulasi Data</h3>
+            
+            <div style="margin-bottom:15px;">
+                <label>Filter Siswa:</label>
+                <select id="filter-nama" onchange="refreshLaporan()" style="border:1px solid var(--accent); color:var(--accent);">
+                    <option value="">-- Tampilkan Semua Siswa --</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-bottom:15px; background:var(--bg-input); padding:10px; border-radius:8px;">
+                <div style="flex:1;">
+                    <label>Mode:</label>
+                    <select id="filter-mode" onchange="refreshLaporan()">
+                        <option value="bulan">🗓️ Bulanan</option>
+                        <option value="semester">📚 Semester</option>
+                    </select>
+                </div>
+                <div style="flex:1;" id="div-filter-bulan">
+                    <label>Bulan:</label>
+                    <input type="month" id="filter-bulan" onchange="refreshLaporan()">
+                </div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="recap-table">
+                    <thead><tr><th style="width:20px;">No</th><th>Nama</th><th class="col-num">S</th><th class="col-num">I</th><th class="col-num">A</th><th class="col-num">K</th></tr></thead>
+                    <tbody id="rekap-body"></tbody>
+                </table>
+            </div>
+            <div style="margin-top:15px; text-align:right;">
+                <button class="btn btn-success" style="width:auto; font-size:0.8em;" onclick="downloadCSV()">⬇ Excel (Rekap)</button>
+            </div>
+        </div>
+        <div class="card">
+            <h3 style="margin-top:0;">Log & Keterangan</h3>
+            <p style="font-size:0.75em; color:var(--text-muted); margin-bottom:10px;">Menampilkan detail data berdasarkan filter di atas.</p>
+            <div style="overflow-x:auto; max-height: 350px;">
+                <table class="recap-table" id="log-table"></table>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-settings" class="section">
+        <div class="card" style="border-left:5px solid var(--success);">
+            <h3>Identitas Lisensi</h3>
+            <label>Nama Guru</label><input type="text" id="set-t" readonly>
+            <label style="margin-top:10px;">Nama Sekolah/Kelas</label><input type="text" id="set-s" readonly>
+            <p style="font-size:0.7em; color:var(--text-muted); margin-top:10px;">*Lisensi eksklusif Digital Ally.</p>
+        </div>
+        
+        <div class="card" style="border-color: var(--accent);">
+            <h3 style="margin-top:0; color:var(--accent);">💾 Backup & Restore</h3>
+            <button class="btn btn-outline" onclick="backupData()">⬇ Backup Data (Aman)</button>
+            <div style="margin-top:10px; border-top:1px solid var(--border); padding-top:10px;">
+                <label>Restore File:</label>
+                <input type="file" id="file-restore" accept=".json" onchange="restoreData(this)">
+            </div>
+        </div>
+        <button class="btn btn-danger" onclick="resetAllData()">🗑️ Hapus Seluruh Data</button>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="nav('home', this)"><span class="nav-icon">📊</span>Home</div>
+        <div class="nav-item" onclick="nav('absen', this)"><span class="nav-icon">📝</span>Absen</div>
+        <div class="nav-item" onclick="nav('kasus', this)"><span class="nav-icon">⚠️</span>Kasus</div>
+        <div class="nav-item" onclick="nav('laporan', this)"><span class="nav-icon">📑</span>Laporan</div>
+        <div class="nav-item" onclick="nav('settings', this)"><span class="nav-icon">⚙️</span>Setelan</div>
+    </div>
+
+<script>
+    /* ==========================================================
+       SETUP ADMIN DIGITAL ALLY (EDIT DI SINI UNTUK PELANGGAN)
+       ========================================================== */
+    const NAMA_GURU = "Bapak Fulan, S.Pd."; 
+    const NAMA_SEKOLAH = "Kelas 9A - SMPN Contoh";
+    const DAFTAR_SISWA = [
+        "Ahmad", "Budi", "Chandra", "Doni", "Eka", "Fajar", "Gilang", "Hadi", "Indra", "Joko"
+    ]; 
+    /* ========================================================== */
+
+    let dbAbsen = JSON.parse(localStorage.getItem('da_pro_absen')) || [];
+    let dbKasus = JSON.parse(localStorage.getItem('da_pro_kasus')) || [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        applyTheme(localStorage.getItem('da_theme') || 'dark');
+        
+        // Load Identitas
+        document.getElementById('disp-teacher').innerText = NAMA_GURU;
+        document.getElementById('disp-school').innerText = NAMA_SEKOLAH;
+        document.getElementById('set-t').value = NAMA_GURU;
+        document.getElementById('set-s').value = NAMA_SEKOLAH;
+
+        setupDate();
+        initApp();
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
+    });
+
+    function toggleTheme() { applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
+    function applyTheme(t) { document.documentElement.setAttribute('data-theme', t); localStorage.setItem('da_theme', t); }
+
+    function setupDate() {
+        const today = new Date().toISOString().split('T')[0];
+        if(document.getElementById('absen-tgl')) document.getElementById('absen-tgl').value = today;
+        if(document.getElementById('kasus-tgl')) document.getElementById('kasus-tgl').value = today;
+        if(document.getElementById('filter-bulan')) document.getElementById('filter-bulan').value = today.slice(0, 7);
+    }
+
+    function initApp() {
+        renderAbsenList();
+        renderDropdowns();
+        updateDashboard();
+        refreshLaporan();
+    }
+
+    // --- DASHBOARD ---
+    function updateDashboard() {
+        const today = new Date().toISOString().split('T')[0];
+        const todayAbsen = dbAbsen.filter(x => x.date === today);
+        const todayKasus = dbKasus.filter(x => x.date === today);
+
+        document.getElementById('today-sakit').innerText = todayAbsen.filter(x => x.type === 'S').length;
+        document.getElementById('today-izin').innerText = todayAbsen.filter(x => x.type === 'I').length;
+        document.getElementById('today-alpha').innerText = todayAbsen.filter(x => x.type === 'A').length;
+        document.getElementById('today-kasus').innerText = todayKasus.length;
+
+        const listDiv = document.getElementById('today-summary');
+        if(todayAbsen.length === 0 && todayKasus.length === 0) {
+            listDiv.innerHTML = '<p style="text-align:center; color:var(--success); font-weight:bold; font-size:0.9em;">Belum ada data masuk hari ini.</p>';
+        } else {
+            let html = '<ul class="today-list">';
+            todayAbsen.forEach(x => {
+                let color = x.type === 'S' ? 'var(--primary)' : (x.type === 'I' ? 'var(--warning)' : 'var(--danger)');
+                html += `<li class="today-item">
+                    <span>${x.name} <br><small style="color:var(--text-muted)">${x.desc}</small></span>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <span class="badge" style="background:${color}">${x.type}</span>
+                        <span onclick="delItem(${x.id}, 'ABSEN')" style="color:var(--danger); cursor:pointer; font-weight:bold; font-size:1.2em;">×</span>
+                    </div>
+                </li>`;
+            });
+            todayKasus.forEach(x => {
+                html += `<li class="today-item"><span>${x.name} <br><small style="color:var(--text-muted)">${x.cat}</small></span><span class="badge" style="background:var(--text-main); color:var(--bg-body)">KASUS</span></li>`;
+            });
+            html += '</ul>';
+            listDiv.innerHTML = html;
+        }
+
+        const scheduleUl = document.getElementById('schedule-container');
+        scheduleUl.innerHTML = '';
+        const jadwal = dbKasus.filter(x => x.deadline && x.deadline !== "").sort((a,b) => new Date(a.deadline) - new Date(b.deadline));
+        if(jadwal.length > 0) {
+            jadwal.forEach(x => {
+                const d = new Date(x.deadline);
+                const tglStr = d.getDate() + '/' + (d.getMonth()+1);
+                scheduleUl.innerHTML += `<li class="today-item" style="border-left:3px solid var(--info); padding-left:10px;">
+                    <div><span style="font-weight:bold; display:block;">${x.name}</span><small style="color:var(--text-muted);">Kasus: ${x.cat}</small></div>
+                    <div style="text-align:right;"><span class="badge" style="background:var(--info); color:white;">${tglStr}</span></div>
+                </li>`;
+            });
+        } else {
+            scheduleUl.innerHTML = '<li style="text-align:center; padding:10px; color:var(--text-muted); font-size:0.8em;">Tidak ada jadwal panggil.</li>';
+        }
+    }
+
+    // --- ABSEN & KASUS ---
+    function renderAbsenList() {
+        const container = document.getElementById('list-absen-container');
+        if(!container) return;
+        container.innerHTML = '';
+        DAFTAR_SISWA.sort().forEach((nama, i) => {
+            container.innerHTML += `
+            <div class="absen-row" data-name="${nama.toLowerCase()}">
+                <div class="absen-top">
+                    <span style="font-size:0.9em;">${i+1}. ${nama}</span>
+                    <div class="absen-opts">
+                        <input type="radio" name="abs_${i}" value="H" checked id="h_${i}" onchange="toggleKet(${i})">
+                        <label><input type="radio" name="abs_${i}" value="S" onchange="toggleKet(${i})"><span class="opt-lbl">S</span></label>
+                        <label><input type="radio" name="abs_${i}" value="I" onchange="toggleKet(${i})"><span class="opt-lbl">I</span></label>
+                        <label><input type="radio" name="abs_${i}" value="A" onchange="toggleKet(${i})"><span class="opt-lbl">A</span></label>
+                    </div>
+                </div>
+                <input type="text" id="ket_${i}" placeholder="Keterangan..." style="display:none; padding:8px; font-size:0.8em; margin-top:5px;">
+            </div>`;
+        });
+    }
+
+    window.toggleKet = function(i) {
+        const val = document.querySelector(`input[name="abs_${i}"]:checked`).value;
+        const input = document.getElementById(`ket_${i}`);
+        input.style.display = (val === 'H') ? 'none' : 'block';
+        if(val === 'H') input.value = '';
+    }
+
+    window.filterAbsen = function() {
+        const term = document.getElementById('search-absen').value.toLowerCase();
+        document.querySelectorAll('.absen-row').forEach(row => { row.style.display = row.dataset.name.includes(term) ? 'flex' : 'none'; });
+    }
+
+    window.simpanAbsen = function() {
+        const tgl = document.getElementById('absen-tgl').value;
+        let count = 0;
+        DAFTAR_SISWA.forEach((nama, i) => {
+            const status = document.querySelector(`input[name="abs_${i}"]:checked`).value;
+            const ket = document.getElementById(`ket_${i}`).value;
+            if(status !== 'H') {
+                dbAbsen.push({ id: Date.now()+i, date: tgl, name: nama, type: status, desc: ket });
+                count++;
+            }
+        });
+        localStorage.setItem('da_pro_absen', JSON.stringify(dbAbsen));
+        alert(count + " Data tersimpan."); initApp();
+    }
+
+    function renderDropdowns() {
+        const sel = document.getElementById('kasus-nama');
+        const selFilter = document.getElementById('filter-nama');
+        if(sel) {
+            sel.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+            DAFTAR_SISWA.forEach(s => sel.innerHTML += `<option value="${s}">${s}</option>`);
+        }
+        if(selFilter) {
+            selFilter.innerHTML = '<option value="">-- Tampilkan Semua Siswa --</option>';
+            DAFTAR_SISWA.sort().forEach(s => selFilter.innerHTML += `<option value="${s}">${s}</option>`);
+        }
+    }
+
+    window.simpanKasus = function() {
+        const n = document.getElementById('kasus-nama').value;
+        const d = document.getElementById('kasus-tgl').value;
+        const k = document.getElementById('kasus-kat').value;
+        const ket = document.getElementById('kasus-ket').value;
+        const deadline = document.getElementById('kasus-deadline').value;
+        if(!n || !ket) return alert("Lengkapi data!");
+        
+        dbKasus.push({ id: Date.now(), date: d, name: n, type: 'KASUS', cat: k, desc: ket, deadline: deadline });
+        localStorage.setItem('da_pro_kasus', JSON.stringify(dbKasus));
+        alert("Kasus dicatat.");
+        document.getElementById('kasus-ket').value = '';
+        document.getElementById('kasus-deadline').value = '';
+        initApp();
+    }
+
+    // --- REKAP & FILTER ---
+    window.refreshLaporan = function() {
+        const mode = document.getElementById('filter-mode').value;
+        const divBulan = document.getElementById('div-filter-bulan');
+        const btn = document.querySelector('#view-laporan .btn-success');
+        
+        divBulan.style.display = (mode === 'semester') ? 'none' : 'block';
+        btn.innerText = (mode === 'semester') ? "⬇ Excel (Rekap Semester)" : "⬇ Excel (Laporan Bulanan)";
+        
+        renderRekap();
+        renderLog();
+    }
+
+    window.renderRekap = function() {
+        const mode = document.getElementById('filter-mode').value;
+        const bulan = document.getElementById('filter-bulan').value;
+        const filterName = document.getElementById('filter-nama').value;
+        const tbody = document.getElementById('rekap-body');
+        tbody.innerHTML = '';
+
+        // Tentukan siapa yang mau ditampilkan (Semua atau 1 orang)
+        let targets = filterName ? [filterName] : DAFTAR_SISWA;
+
+        targets.sort().forEach((nama, idx) => {
+            let myAbsen = dbAbsen.filter(x => x.name === nama);
+            let myKasus = dbKasus.filter(x => x.name === nama);
+
+            if(mode === 'bulan') {
+                myAbsen = myAbsen.filter(x => x.date.startsWith(bulan));
+                myKasus = myKasus.filter(x => x.date.startsWith(bulan));
+            }
+
+            const s = myAbsen.filter(x => x.type === 'S').length;
+            const i = myAbsen.filter(x => x.type === 'I').length;
+            const a = myAbsen.filter(x => x.type === 'A').length;
+            const k = myKasus.length;
+            
+            const sStyle = s > 0 ? 'style="color:var(--primary)"' : 'class="zero-val"';
+            const iStyle = i > 0 ? 'style="color:var(--warning)"' : 'class="zero-val"';
+            const aStyle = a > 0 ? 'style="color:var(--danger)"' : 'class="zero-val"';
+            const kStyle = k > 0 ? 'style="color:var(--text-main); font-weight:bold;"' : 'class="zero-val"';
+
+            tbody.innerHTML += `<tr><td style="color:var(--text-muted);">${filterName ? 1 : idx+1}</td><td>${nama}</td><td class="col-num" ${sStyle}>${s}</td><td class="col-num" ${iStyle}>${i}</td><td class="col-num" ${aStyle}>${a}</td><td class="col-num" ${kStyle}>${k}</td></tr>`;
+        });
+    }
+
+    function renderLog() {
+        const mode = document.getElementById('filter-mode').value;
+        const bulan = document.getElementById('filter-bulan').value;
+        const filterName = document.getElementById('filter-nama').value;
+
+        let all = [...dbAbsen, ...dbKasus].sort((a,b) => new Date(b.date) - new Date(a.date));
+        
+        // Filter by Name
+        if(filterName) {
+            all = all.filter(x => x.name === filterName);
+        }
+        
+        // Filter by Date (Agar sesuai dengan rekap di atasnya)
+        if(mode === 'bulan') {
+            all = all.filter(x => x.date.startsWith(bulan));
+        }
+
+        const table = document.getElementById('log-table');
+        table.innerHTML = '';
+        
+        if(all.length === 0) {
+            table.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:15px; color:var(--text-muted);">Tidak ada data detail.</td></tr>';
+            return;
+        }
+
+        all.forEach(x => {
+            let label = x.type === 'KASUS' ? '⚠️' : x.type;
+            let extra = x.deadline ? `<br><small style="color:var(--info)">Target: ${x.deadline}</small>` : '';
+            // Tampilkan Keterangan/Desc
+            let ket = x.desc || x.cat || '-';
+            
+            table.innerHTML += `<tr>
+                <td style="width:75px; font-size:0.7em; color:var(--text-muted); vertical-align:top;">${x.date}</td>
+                <td style="vertical-align:top;">${x.name}<br><span style="font-size:0.8em; color:var(--text-main); font-style:italic;">"${ket}"</span>${extra}</td>
+                <td style="text-align:right; font-weight:bold; vertical-align:top;">${label}</td>
+                <td style="width:30px; text-align:center; vertical-align:top;"><span onclick="delItem(${x.id}, '${x.type}')" style="color:var(--danger); cursor:pointer;">×</span></td>
+            </tr>`;
+        });
+    }
+
+    window.delItem = function(id, type) {
+        if(!confirm("Hapus data ini?")) return;
+        if(type === 'KASUS' || type === 'K') {
+            dbKasus = dbKasus.filter(x => x.id !== id);
+            localStorage.setItem('da_pro_kasus', JSON.stringify(dbKasus));
+        } else {
+            dbAbsen = dbAbsen.filter(x => x.id !== id);
+            localStorage.setItem('da_pro_absen', JSON.stringify(dbAbsen));
+        }
+        initApp();
+    }
+
+    // --- SYSTEM ---
+    window.backupData = function() {
+        const data = { absen: dbAbsen, kasus: dbKasus };
+        const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `BACKUP_${NAMA_GURU}_${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+    }
+
+    window.restoreData = function(input) {
+        const file = input.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if(data.absen) { dbAbsen = data.absen; localStorage.setItem('da_pro_absen', JSON.stringify(dbAbsen)); }
+                if(data.kasus) { dbKasus = data.kasus; localStorage.setItem('da_pro_kasus', JSON.stringify(dbKasus)); }
+                alert("Data berhasil dipulihkan!"); location.reload();
+            } catch(err) { alert("File rusak."); }
+        };
+        reader.readAsText(file);
+    }
+
+    window.resetAllData = function() {
+        if(confirm("YAKIN HAPUS SEMUA? Data akan hilang permanen.")) {
+            localStorage.removeItem('da_pro_absen');
+            localStorage.removeItem('da_pro_kasus');
+            location.reload();
+        }
+    }
+    
+    window.downloadCSV = function() {
+        const mode = document.getElementById('filter-mode').value;
+        const bulan = document.getElementById('filter-bulan').value;
+        let csv = "NO,NAMA,SAKIT,IZIN,ALPHA,KASUS\n";
+        
+        DAFTAR_SISWA.sort().forEach((nama, idx) => {
+            let myAbsen = dbAbsen.filter(x => x.name === nama);
+            let myKasus = dbKasus.filter(x => x.name === nama);
+            if(mode === 'bulan') {
+                myAbsen = myAbsen.filter(x => x.date.startsWith(bulan));
+                myKasus = myKasus.filter(x => x.date.startsWith(bulan));
+            }
+            csv += `${idx+1},"${nama}",${myAbsen.filter(x=>x.type==='S').length},${myAbsen.filter(x=>x.type==='I').length},${myAbsen.filter(x=>x.type==='A').length},${myKasus.length}\n`;
+        });
+        const a = document.createElement("a");
+        a.href = "data:text/csv;charset=utf-8," + encodeURI(csv);
+        a.download = `Rekap_${NAMA_GURU}.csv`;
+        a.click();
+    }
+
+    window.nav = function(id, el) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('view-'+id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        if(id === 'home') updateDashboard();
+        if(id === 'laporan') refreshLaporan();
+    }
+</script>
+</body>
+</html>
